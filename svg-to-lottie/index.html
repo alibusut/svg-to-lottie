@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محول SVG إلى Lottie</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #output {
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>محول SVG إلى Lottie</h1>
+    <form id="uploadForm">
+      <input type="file" id="svgFile" accept=".svg">
+      <button type="submit">تحويل</button>
+    </form>
+    <div id="output" style="display: none;">
+      <h2>النتيجة:</h2>
+      <pre id="result"></pre>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('svgFile');
+      if (!fileInput.files.length) {
+        alert('يرجى رفع ملف SVG');
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function () {
+        const svgContent = reader.result;
+        // استدعاء دالة التحويل
+        fetch('/api/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ svg: svgContent }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+          })
+          .catch((err) => alert('حدث خطأ أثناء التحويل'));
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
